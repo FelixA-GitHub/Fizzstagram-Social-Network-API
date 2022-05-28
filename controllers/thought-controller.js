@@ -21,7 +21,7 @@ const thoughtController = {
             });
     },
 
-    // createThought
+    // createThought and updates user with new thought
     createThought({ params, body }, res) {
         Thought.create(body)
         .then(({ _id }) => {
@@ -56,7 +56,7 @@ const thoughtController = {
     },
 
 
-    // delete Thought by id
+    // delete Thought by id by pulling thoughtId from user
     deleteThought({ params }, res) {
         Thought.findOneAndDelete({ _id: params.thoughtId })
           .then(deletedThought => {
@@ -79,7 +79,8 @@ const thoughtController = {
           .catch(err => res.json(err));
       },
 
-    // create reaction to thought
+    // create reaction to thought 
+    // updates thought as a new thought with a reaction
     createReactionToThought({ params, body }, res) {
         Thought.findOneAndUpdate({ _id: params.thoughtId }, { $push: { reactions: body } }, { new: true, unique: true })
         .then(dbThoughtData => {
@@ -92,7 +93,8 @@ const thoughtController = {
           .catch(err => res.json(err));
       },
 
-    // delete reaction from thought
+    // delete reaction from thought by pulling reaction from thought by reactionId
+    // this also updates the thought as a new version, without pulled reaction
     deleteReactionToThought({ params }, res) {
         Thought.findOneAndUpdate(
             { _id: params.thoughtId },
