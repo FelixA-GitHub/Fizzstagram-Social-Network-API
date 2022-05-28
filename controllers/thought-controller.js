@@ -1,15 +1,9 @@
-const { Thought } = require('../models');
+const { Thought, User } = require('../models');
 
 const thoughtController = {
     // get all thoughts
     getAllThoughts(req, res) {
         Thought.find({})
-            .populate({
-                path: 'users',
-                select: '-__v'
-            })
-            .select('-__v')
-            .sort({ _id: -1 })
             .then(dbThoughtData => res.json(dbThoughtData))
             .catch(err => {
                 console.log(err);
@@ -18,13 +12,8 @@ const thoughtController = {
     },
 
     // get Thought by id
-    getThoughtById(req, res) {
+    getThoughtById({ params }, res) {
         Thought.findOne({ _id: params.id })
-            .populate({
-                path: 'users',
-                select: '-__v'
-            })
-            .select('-__v')
             .then(dbThoughtData => res.json(dbThoughtData))
             .catch(err => {
                 console.log(err);
@@ -62,15 +51,15 @@ const thoughtController = {
     },
     // create reaction to thought
     createReactionToThought({ params }, res) {
-        Thought.findOneAndUpdate({ _id: params.id, friends: { $new: params.friendId } }, { $push: { friends: params.friendId } }, { new: true, unique: true })
-            .then(dbThoughtData => res.json(dbThoughtData, { message: 'New friend added!' }))
+        Thought.findOneAndUpdate({ _id: params.id, reactions: { $new: params.reactionId } }, { $push: { reactions: params.reactionId } }, { new: true, unique: true })
+            .then(dbThoughtData => res.json(dbThoughtData, { message: 'New reaction added!' }))
             .catch(err => res.json(err));
     },
 
     // delete reaction from thought
     deleteReactionToThought({ params }, res) {
-        Thought.findOneAndDelete({ _id: params.id }, { $pull: { friends: params.friendId } }, { new: true })
-            .then(dbThoughtData => res.json(dbThoughtData, { message: 'Friend deleted!' }))
+        Thought.findOneAndDelete({ _id: params.id }, { $pull: { reactions: params.reactionId } }, { new: true })
+            .then(dbThoughtData => res.json(dbThoughtData, { message: 'reaction deleted!' }))
             .catch(err => res.json(err));
     }
 };

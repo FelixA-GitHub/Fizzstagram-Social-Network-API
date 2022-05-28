@@ -13,6 +13,10 @@ const ReactionSchema = new Schema (
             maxlength: [280, 'I am stuffed']
         },
         username: {
+            type: String,
+            required: true
+        },
+        createdAt: {
             type: Date,
             default: Date.now,
             get: createdAtVal => dateFormat(createdAtVal)
@@ -57,6 +61,5 @@ ThoughtSchema.virtual('reactionCount').get(function() {
 });
 
 const Thought = model('Thought', ThoughtSchema);
-const Reaction = model('Reaction', ReactionSchema);
 
-module.exports = Thought, Reaction;
+module.exports = Thought;
