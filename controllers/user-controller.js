@@ -62,14 +62,6 @@ const userController = {
     },
 
     // add Friend to user
-    // addFriendToUser({ params }, res) {
-    //     User.findOneAndUpdate(
-    //         { _id: params.id },
-    //         { $push: { friends: params.id } },
-    //         { new: true, unique: true })
-    //         .then(dbUserData => res.json(dbUserData, { message: 'New friend added!' }))
-    //         .catch(err => res.json(err));
-    // },
     addFriendToUser({ params }, res) {
         User.findOneAndUpdate(
             { _id: params.userId },
