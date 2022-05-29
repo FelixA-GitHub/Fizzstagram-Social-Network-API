@@ -63,17 +63,57 @@ const userController = {
 
     // add Friend to user
     addFriendToUser({ params }, res) {
-        User.findOneAndUpdate({ _id: params.id, friends: { $new: params.friendId }},{ $push: { friends: params.friendId }},{ new: true, unique: true })
-        .then(dbUserData => res.json(dbUserData, { message: 'New friend added!'}))
-        .catch(err => res.json(err));
-    },
-    
+    //     User.findOneAndUpdate(
+    //         { _id: params.id, friends: { $new: params.friendId } },
+    //         { $push: { friends: params.friendId } },
+    //         { new: true, unique: true })
+    //         .then(dbUserData => res.json(dbUserData, { message: 'New friend added!' }))
+    //         .catch(err => res.json(err));
+    // },
+    // createThought and updates user with new thought
+    // createThought({ params, body }, res) {
+        User.create(body)
+        .then(({ _id, username }) => {
+            return User.findOneAndUpdate(
+              { _id: params.id },
+              { $push: { friends: _id } },
+              { new: true }
+            );
+          })
+          .then(dbUserData => {
+            if (!dbUserData) {
+              res.status(404).json({ message: 'No User found with this id!' });
+              return;
+            }
+            res.json(dbUserData);
+          })
+          .catch(err => res.json(err));
+      },
+
     // delete Friend from user
     deleteFriendFromUser({ params }, res) {
-        User.findOneAndDelete({ _id: params.id },{ $pull: { friends: params.friendId }},{ new: true })
-            .then(dbUserData => res.json(dbUserData, { message: 'Friend deleted!'}))
+        User.findOneAndDelete({ _id: params.id }, { $pull: { friends: params.friendId } }, { new: true })
+            .then(dbUserData => res.json(dbUserData, { message: 'Friend deleted!' }))
             .catch(err => res.json(err));
     }
+    // deleteThought({ params, body }, res) {
+    //     Thought.findOneAndDelete(body)
+    //     .then(({ _id, username }) => {
+    //         return User.findOneAndUpdate(
+    //           { username: username },
+    //           { $pull: { thoughts: _id } },
+    //           { new: true }
+    //         );
+    //       })
+    //       .then(dbUserData => {
+    //         if (!dbUserData) {
+    //           res.status(404).json({ message: 'No User found with this id!' });
+    //           return;
+    //         }
+    //         res.json(dbUserData);
+    //       })
+    //       .catch(err => res.json(err));
+    //   }
 };
 
 module.exports = userController;
