@@ -8,6 +8,10 @@ const userController = {
                 path: 'thoughts',
                 select: '-__v'
             })
+            .populate({
+                path: 'friends',
+                select: '-__v'
+            })
             .select('-__v')
             .sort({ _id: -1 })
             .then(dbUserData => res.json(dbUserData))
@@ -22,6 +26,10 @@ const userController = {
         User.findOne({ _id: params.id })
             .populate({
                 path: 'thoughts',
+                select: '-__v'
+            })
+            .populate({
+                path: 'friends',
                 select: '-__v'
             })
             .select('-__v')
@@ -62,12 +70,16 @@ const userController = {
     },
 
     // add Friend to user
-    addFriendToUser({ params, _id }, res) {
+    addFriendToUser({ params }, res) {
         User.findOneAndUpdate(
-                    { friendId: params.friendId },
-                    { $push: { friends: { friendId: _id } } },
-                    { new: true, runValidators: true })
-          
+            { _id: params.userId },
+            { $push: { friends: { friendId: params.friendId} } },
+            { new: true })
+            .populate({
+                path: 'friends',
+                select: '-__v'
+            })
+            .select('-__v')
             .then(dbUserData => {
                 if (!dbUserData) {
                     res.status(404).json({ message: 'No User found with this id!' });
@@ -79,11 +91,16 @@ const userController = {
     },
 
     // delete Friend from user
-    deleteFriendFromUser({ params, _id }, res) {
+    deleteFriendFromUser({ params }, res) {
         User.findOneAndUpdate(
             { _id: params.userId },
-            { $pull: { friends: { friendId: _id } } },
-            { new: true, runValidators: true })
+            { $pull: { friends: { friendId: params.friendId} } },
+            { new: true })
+            .populate({
+                path: 'friends',
+                select: '-__v'
+            })
+            .select('-__v')
             .then(dbUserData => {
                 if (!dbUserData) {
                     res.status(404).json({ message: 'No User found with this id!' });

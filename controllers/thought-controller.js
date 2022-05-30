@@ -4,6 +4,11 @@ const thoughtController = {
     // get all thoughts
     getAllThoughts(req, res) {
         Thought.find({})
+            .populate({
+                path: 'reactions',
+                select: '-__v'
+            })
+            .select('-__v')
             .then(dbThoughtData => res.json(dbThoughtData))
             .catch(err => {
                 console.log(err);
@@ -14,6 +19,11 @@ const thoughtController = {
     // get Thought by id
     getThoughtById({ params }, res) {
         Thought.findOne({ _id: params.id })
+            .populate({
+                path: 'reactions',
+                select: '-__v'
+            })
+            .select('-__v')
             .then(dbThoughtData => res.json(dbThoughtData))
             .catch(err => {
                 console.log(err);
@@ -24,19 +34,19 @@ const thoughtController = {
     // createThought and updates user with new thought
     createThought({ params, body }, res) {
         Thought.create(body)
-            .then(({ _id, username }) => {
+            .then(({ _id }) => {
                 return User.findOneAndUpdate(
-                    { username: username },
+                    { _id: params.userId },
                     { $push: { thoughts: _id } },
                     { new: true }
                 );
             })
-            .then(dbUserData => {
-                if (!dbUserData) {
-                    res.status(404).json({ message: 'No User found with this id!' });
+            .then(dbThoughtData => {
+                if (!dbThoughtData) {
+                    res.status(404).json({ message: 'No Thought found with this id!' });
                     return;
                 }
-                res.json(dbUserData);
+                res.json(dbThoughtData);
             })
             .catch(err => res.json(err));
     },
@@ -44,7 +54,15 @@ const thoughtController = {
     // update Thought by id
     updateThought({ params, body }, res) {
         //runValidators: true? We need to include this explicit setting when updating data so that it knows to validate any new information.
-        Thought.findOneAndUpdate({ _id: params.id }, body, { new: true, runValidators: true })
+        Thought.findOneAndUpdate(
+            { _id: params.id },
+            body,
+            { new: true, runValidators: true })
+            .populate({
+                path: 'reactions',
+                select: '-__v'
+            })
+            .select('-__v')
             .then(dbThoughtData => {
                 if (!dbThoughtData) {
                     res.status(404).json({ message: 'No Thought found with this id!' });
@@ -57,21 +75,14 @@ const thoughtController = {
 
 
     // delete Thought by id by pulling thoughtId from user
-    deleteThought({ params, body }, res) {
-        Thought.findOneAndDelete(body)
-            .then(({ _id, username }) => {
-                return User.findOneAndUpdate(
-                    { username: username },
-                    { $pull: { thoughts: _id } },
-                    { new: true }
-                );
-            })
-            .then(dbUserData => {
-                if (!dbUserData) {
-                    res.status(404).json({ message: 'No User found with this id!' });
+    deleteThought({ params }, res) {
+        Thought.findOneAndDelete({_id: params.id})
+            .then(dbThoughtData => {
+                if (!dbThoughtData) {
+                    res.status(404).json({ message: 'No Thought found with this id!' });
                     return;
                 }
-                res.json(dbUserData);
+                res.json(dbThoughtData);
             })
             .catch(err => res.json(err));
     },
@@ -83,6 +94,11 @@ const thoughtController = {
             { _id: params.thoughtId },
             { $push: { reactions: body } },
             { new: true, unique: true })
+            .populate({
+                path: 'reactions',
+                select: '-__v'
+            })
+            .select('-__v')
             .then(dbThoughtData => {
                 if (!dbThoughtData) {
                     res.status(404).json({ message: 'No Thought found with this id!' });
